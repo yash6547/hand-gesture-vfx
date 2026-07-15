@@ -14,7 +14,6 @@ export class UIController {
         this.cameraSelect = document.getElementById('cameraSelect');
         this.resSelect = document.getElementById('resolutionScale');
         this.audioCheck = document.getElementById('audioPulse');
-        this.chromaCheck = document.getElementById('chromaKeyToggle');
         this.statusIndicator = document.getElementById('engine-status');
         
         this.alertTimeout = null;
@@ -50,13 +49,6 @@ export class UIController {
             this.audioCheck.addEventListener('change', (e) => {
                 CONFIG.audioPulseEnabled = e.target.checked;
                 this.showSystemAlert(`HUD AUDIO: ${CONFIG.audioPulseEnabled ? 'ONLINE' : 'OFFLINE'}`);
-            });
-        }
-
-        if (this.chromaCheck) {
-            this.chromaCheck.addEventListener('change', (e) => {
-                CONFIG.chromaKeyEnabled = e.target.checked;
-                this.showSystemAlert(`CHROMA KEY ENGINE: ${CONFIG.chromaKeyEnabled ? 'ACTIVE' : 'OFFLINE'}`);
             });
         }
     }
