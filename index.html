@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Energy Beams - Cyberpunk VFX System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <video id="webcam" autoplay playsinline muted></video>
+    <!-- FIXED: Hardware video containers loaded inside DOM tree directly -->
+    <video id="plasma_intro" src="./assets/images/plasma_intro.mp4" muted playsinline style="display:none;"></video>
+    <video id="plasma_loop" src="./assets/images/plasma_loop.mp4" loop muted playsinline style="display:none;"></video>
+    <video id="portal_intro" src="./assets/images/portal_intro.mp4" muted playsinline style="display:none;"></video>
+    <video id="portal_loop" src="./assets/images/portal_loop.mp4" loop muted playsinline style="display:none;"></video>
+    <canvas id="bg-canvas"></canvas>
+    <canvas id="vfx-canvas"></canvas>
+
+    <main id="app-hud">
+        <header class="hud-header">
+            <h1 class="brand-title">ENERGY_BEAM_SYS // v2.5</h1>
+            <div id="performance-panel">
+                <div class="stat-group"><span class="label">FPS:</span> <span id="fps-val" class="value">00</span></div>
+                <div class="stat-group" style="margin-left: 15px;"><span class="label">ENGINE:</span> <span id="engine-status" class="value" style="color: #00ffcc;">BOOTING</span></div>
+            </div>
+        </header>
+
+        <div id="gesture-alert" class="hidden">SYS_ALERT: INITIALIZING...</div>
+
+        <section id="controls-sidebar">
+            <div class="panel-header">
+                <h2>SYSTEM_CONFIGURATION</h2>
+                <button id="toggle-settings">⚙</button>
+            </div>
+            
+            <div id="settings-scroll-area" class="collapsed">
+                <div class="settings-group">
+                    <h3>[01] POWER CONTROLLER</h3>
+                    <div class="control-row">
+                        <label for="power-mode">ACTIVE MODE</label>
+                        <select id="power-mode">
+                            <option value="neon-laser" selected>⚡ Neon Laser Link</option>
+                            <option value="plasma-shield">🔥 Plasma Force Field</option>
+                            <option value="doctor-strange">🌀 Mystic Sorcerer Portal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>[02] GENERAL VISUALS</h3>
+                    <div class="control-row">
+                        <label for="cameraSelect">CAMERA SOURCE</label>
+                        <select id="cameraSelect" class="settings-dropdown">
+                            <option value="">Scanning hardware...</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label for="beam-thickness">BEAM THICKNESS (<span id="v-beam-thickness">6</span>px)</label>
+                        <input type="range" id="beam-thickness" min="1" max="25" value="6" step="0.5">
+                    </div>
+                    <div class="control-row">
+                        <label for="glow-intensity">GLOW RADIUS (<span id="v-glow-intensity">25</span>px)</label>
+                        <input type="range" id="glow-intensity" min="5" max="60" value="25">
+                    </div>
+                    <div class="control-row checkbox-row">
+                        <label for="mirror-mode">MIRROR FEED</label>
+                        <input type="checkbox" id="mirror-mode" checked>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>[03] ADVANCED SYSTEM DIAGNOSTICS</h3>
+                    <div class="control-row">
+                        <label for="resolutionScale">STREAM RESOLUTION</label>
+                        <select id="resolutionScale" class="settings-dropdown">
+                            <option value="480">Standard (640x480) [Fast]</option>
+                            <option value="720" selected>HD High (1280x720)</option>
+                            <option value="1080">Full HD (1920x1080) [Max Quality]</option>
+                        </select>
+                    </div>
+                    <div class="control-row checkbox-row">
+                        <label for="audioPulse">HUD GLITCH SFX</label>
+                        <input type="checkbox" id="audioPulse">
+                    </div>
+                    <div class="control-row checkbox-row">
+                        <label for="chromaKeyToggle">APPLY CHROMA KEY</label>
+                        <input type="checkbox" id="chromaKeyToggle">
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>[04] CORE CONTROLS</h3>
+                    <div class="action-buttons">
+                        <button id="btn-fullscreen" class="btn-primary">FULLSCREEN</button>
+                        <button id="btn-reset" class="btn-danger">RESET SETTINGS</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
