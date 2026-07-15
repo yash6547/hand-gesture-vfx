@@ -1,6 +1,6 @@
 export class SpecialEffectsEngine {
     constructor() {
-        // DOM nodes targeting verified
+        // DOM nodes targeting verified (.webm transparent files)
         this.plasmaIntro = document.getElementById('plasma_intro');
         this.plasmaLoop = document.getElementById('plasma_loop');
         this.portalIntro = document.getElementById('portal_intro');
@@ -10,35 +10,58 @@ export class SpecialEffectsEngine {
         this.activePlasmaVideo = null;
         this.activePortalVideo = null;
 
-        // Offscreen canvas layer configuration
-        this.chromaCanvas = document.createElement('canvas');
-        this.chromaCtx = this.chromaCanvas.getContext('2d');
+        // Strict boolean guards to ensure intro runs EXACTLY ONCE
+        this.isPlasmaIntroDone = false;
+        this.isPortalIntroDone = false;
+
+        // FIXED: Magic number to skip invisible blank frames in webm
+        this.loopSeekStart = 0.08; 
     }
 
     renderPlasmaSphere(ctx, x, y, currentDistanceRadius) {
         if (!this.plasmaIntro || !this.plasmaLoop) return;
 
-        // Force initialize streams if tracking starts
         if (!this.activePlasmaVideo) {
             this.activePlasmaVideo = this.plasmaIntro;
             this.plasmaLoop.pause();
-            this.plasmaLoop.currentTime = 0;
-            this.plasmaIntro.currentTime = 0;
+            this.plasmaLoop.currentTime = this.loopSeekStart; 
+            this.plasmaIntro.currentTime = 0.01;
+            
+            this.plasmaIntro.muted = false;
+            this.plasmaIntro.volume = 0.8;
+            this.plasmaIntro.play().catch(() => {});
         }
 
-        // Continuous playback check engine
-        if (this.activePlasmaVideo.paused) {
-            this.activePlasmaVideo.play().catch(() => {});
-        }
-
-        // Seamless bridge sequence from intro to loop
-        if (this.activePlasmaVideo === this.plasmaIntro && this.plasmaIntro.ended) {
+        const isIntroEnding = this.plasmaIntro.ended || (this.plasmaIntro.currentTime >= this.plasmaIntro.duration - 0.2);
+        
+        if (!this.isPlasmaIntroDone) {
+            if (isIntroEnding) {
+                this.plasmaIntro.pause();
+                this.plasmaIntro.currentTime = 0.01;
+                this.isPlasmaIntroDone = true; 
+                this.activePlasmaVideo = this.plasmaLoop;
+                this.plasmaLoop.muted = false;
+                this.plasmaLoop.volume = 0.6;
+                this.plasmaLoop.currentTime = this.loopSeekStart;
+                this.plasmaLoop.play().catch(() => {});
+            } else if (this.plasmaIntro.paused) {
+                this.plasmaIntro.play().catch(() => {});
+            }
+        } else {
             this.activePlasmaVideo = this.plasmaLoop;
-            this.plasmaLoop.currentTime = 0;
-            this.plasmaLoop.play().catch(() => {});
+            
+            if (this.plasmaLoop.currentTime >= this.plasmaLoop.duration - 0.15) {
+                this.plasmaLoop.currentTime = this.loopSeekStart; 
+            }
+            if (this.plasmaLoop.paused) {
+                this.plasmaLoop.muted = false;
+                this.plasmaLoop.volume = 0.6;
+                this.plasmaLoop.play().catch(() => {});
+            }
         }
 
-        this.drawVFXWithChromaOption(ctx, this.activePlasmaVideo, x, y, currentDistanceRadius * 2);
+        const finalSize = currentDistanceRadius * 1.85;
+        this.drawEnhancedVFX(ctx, this.activePlasmaVideo, x, y, finalSize, '#00d2ff');
     }
 
     renderMysticPortal(ctx, x, y, currentDistanceRadius) {
@@ -47,65 +70,72 @@ export class SpecialEffectsEngine {
         if (!this.activePortalVideo) {
             this.activePortalVideo = this.portalIntro;
             this.portalLoop.pause();
-            this.portalLoop.currentTime = 0;
-            this.portalIntro.currentTime = 0;
+            this.portalLoop.currentTime = this.loopSeekStart;
+            this.portalIntro.currentTime = 0.01;
+
+            this.portalIntro.muted = false;
+            this.portalIntro.volume = 0.8;
+            this.portalIntro.play().catch(() => {});
         }
 
-        if (this.activePortalVideo.paused) {
-            this.activePortalVideo.play().catch(() => {});
-        }
-
-        if (this.activePortalVideo === this.portalIntro && this.portalIntro.ended) {
+        const isIntroEnding = this.portalIntro.ended || (this.portalIntro.currentTime >= this.portalIntro.duration - 0.2);
+        
+        if (!this.isPortalIntroDone) {
+            if (isIntroEnding) {
+                this.portalIntro.pause();
+                this.portalIntro.currentTime = 0.01;
+                this.isPortalIntroDone = true; 
+                this.activePortalVideo = this.portalLoop;
+                this.portalLoop.muted = false;
+                this.portalLoop.volume = 0.6;
+                this.portalLoop.currentTime = this.loopSeekStart;
+                this.portalLoop.play().catch(() => {});
+            } else if (this.portalIntro.paused) {
+                this.portalIntro.play().catch(() => {});
+            }
+        } else {
             this.activePortalVideo = this.portalLoop;
-            this.portalLoop.currentTime = 0;
-            this.portalLoop.play().catch(() => {});
+            
+            if (this.portalLoop.currentTime >= this.portalLoop.duration - 0.15) {
+                this.portalLoop.currentTime = this.loopSeekStart; 
+            }
+            if (this.portalLoop.paused) {
+                this.portalLoop.muted = false;
+                this.portalLoop.volume = 0.6;
+                this.portalLoop.play().catch(() => {});
+            }
         }
 
-        this.drawVFXWithChromaOption(ctx, this.activePortalVideo, x, y, currentDistanceRadius * 2.2);
+        const finalSize = currentDistanceRadius * 2.35;
+        const shiftedY = y - (finalSize * 0.15);
+        this.drawEnhancedVFX(ctx, this.activePortalVideo, x, shiftedY, finalSize, '#ff6600');
     }
 
     resetVFXTracks() {
-        if (this.activePlasmaVideo === this.plasmaLoop && this.plasmaLoop) this.plasmaLoop.pause();
-        if (this.activePortalVideo === this.portalLoop && this.portalLoop) this.portalLoop.pause();
+        if (this.plasmaIntro) { this.plasmaIntro.pause(); this.plasmaIntro.muted = true; }
+        if (this.plasmaLoop) { this.plasmaLoop.pause(); this.plasmaLoop.muted = true; }
+        if (this.portalIntro) { this.portalIntro.pause(); this.portalIntro.muted = true; }
+        if (this.portalLoop) { this.portalLoop.pause(); this.portalLoop.muted = true; }
+
         this.activePlasmaVideo = null;
         this.activePortalVideo = null;
+        this.isPlasmaIntroDone = false;
+        this.isPortalIntroDone = false;
     }
 
-    drawVFXWithChromaOption(ctx, videoElement, x, y, size) {
-        // FIXED: Enforce buffer checking to block 0px drawing execution loops
+    drawEnhancedVFX(ctx, videoElement, x, y, size, glowColor) {
         if (!videoElement || videoElement.paused || size < 10 || videoElement.readyState < 2) return;
 
         ctx.save();
-        ctx.globalCompositeOperation = 'screen';
+        
+        // FIXED: Opacity reduced to 0.55 for a lighter blend
+        ctx.globalAlpha = 0.65; 
+        
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.shadowBlur = 3;
+        ctx.shadowColor = glowColor;
 
-        if (window.CONFIG && window.CONFIG.chromaKeyEnabled) {
-            this.chromaCanvas.width = size;
-            this.chromaCanvas.height = size;
-            
-            this.chromaCtx.drawImage(videoElement, 0, 0, size, size);
-            
-            const frameData = this.chromaCtx.getImageData(0, 0, size, size);
-            const pixels = frameData.data;
-            const totalPixels = pixels.length;
-
-            for (let i = 0; i < totalPixels; i += 4) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-
-                // Dynamic background data alpha processing execution
-                if ((r < 45 && g < 45 && b < 45) || (g > 100 && r < 90 && b < 90)) {
-                    pixels[i + 3] = 0; 
-                }
-            }
-
-            this.chromaCtx.putImageData(frameData, 0, 0);
-            ctx.drawImage(this.chromaCanvas, x - size / 2, y - size / 2);
-
-        } else {
-            ctx.drawImage(videoElement, x - size / 2, y - size / 2, size, size);
-        }
-
+        ctx.drawImage(videoElement, x - size / 2, y - size / 2, size, size);
         ctx.restore();
     }
 }
