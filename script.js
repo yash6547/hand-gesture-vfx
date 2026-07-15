@@ -1,9 +1,9 @@
-import { CONFIG, getDistance2D } from './utils.js';
-import { MediaPipeManager } from './mediapipe.js';
-import { BeamRenderer } from './beam.js';
-import { OrbRenderer } from './orbs.js';
-import { SpecialEffectsEngine } from './effects.js';
-import { UIController } from './ui.js';
+import { CONFIG, getDistance2D } from './utils.js?v=2.1';
+import { MediaPipeManager } from './mediapipe.js?v=2.1';
+import { BeamRenderer } from './beam.js?v=2.1';
+import { OrbRenderer } from './orbs.js?v=2.1';
+import { SpecialEffectsEngine } from './effects.js?v=2.1'; // FIXED: Added ?v=2.1 here
+import { UIController } from './ui.js?v=2.1';
 
 class CoreVFXEngine {
     constructor() {
